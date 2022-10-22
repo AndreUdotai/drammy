@@ -21,7 +21,6 @@ const SongSchema = new Schema({
     album: {
         type: Schema.Types.ObjectId,
         ref: 'Album',
-        required: true,
     },
     genre: {
         type: Schema.Types.ObjectId,
