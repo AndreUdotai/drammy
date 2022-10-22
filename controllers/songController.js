@@ -1,5 +1,9 @@
 const Song = require("../models/song");
 
+exports.index = (req, res) => {
+  res.send("NOT IMPLEMENTED: Site Home Page");
+};
+
 // Display list of all Song.
 exports.song_list = (req, res) => {
   res.send("NOT IMPLEMENTED: Song list");
