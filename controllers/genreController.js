@@ -28,8 +28,11 @@ exports.genre_detail = (req, res) => {
           Genre.findById(req.params.id).exec(callback);
         },
 
-        genre_artists(callback) {
-          Song.find({ genre: req.params.id }).exec(callback);
+        genre_songs(callback) {
+          Song.find({ genre: req.params.id })
+            .populate('artist')
+            .populate('album')
+            .exec(callback);
         },
       },
       (err, results) => {
@@ -46,7 +49,7 @@ exports.genre_detail = (req, res) => {
         res.render("genre_detail", {
             title: "Genre Detail",
             genre: results.genre,
-            genre_artists: results.genre_artists,
+            genre_songs: results.genre_songs,
         });
       }
     );
