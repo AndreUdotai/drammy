@@ -1,8 +1,20 @@
+const { nextTick } = require("async");
 const Artist = require("../models/artist");
 
 // Display list of all artists.
 exports.artist_list = (req, res) => {
-    res.send("NOT IMPLEMENTED: Artist List");
+    Artist.find({}, 'name')
+        .sort({ name: 1 })
+        .exec(function (err, list_artists) {
+            if (err) {
+                return next(err);
+            }
+            // Successful, so render
+            res.render("artist_list", {
+                title: "Artists List",
+                artist_list: list_artists,
+            });
+        });
 };
 
 // Display detail page for each artist.
