@@ -1,8 +1,36 @@
 const Song = require("../models/song");
+const Artist = require("../models/artist");
+const Genre = require("../models/genre");
+const Album = require("../models/album");
+
+const async = require("async");
 
 exports.index = (req, res) => {
-  res.send("NOT IMPLEMENTED: Site Home Page");
+  async.parallel(
+    {
+      song_count(callback) {
+        Song.countDocuments({}, callback); // Pass an empty object as match condition to find all documents of this collection
+      },
+      album_count(callback) {
+        Album.countDocuments({}, callback);
+      },
+      artist_count(callback) {
+        Artist.countDocuments({}, callback);
+      },
+      genre_count(callback) {
+        Genre.countDocuments({}, callback);
+      },
+    },
+    (err, results) => {
+      res.render("index", {
+        title: "Drammy Music Catalog",
+        error: err,
+        data: results,
+      });
+    }
+  );
 };
+
 
 // Display list of all Song.
 exports.song_list = (req, res) => {
