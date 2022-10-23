@@ -32,9 +32,21 @@ exports.index = (req, res) => {
 };
 
 
-// Display list of all Song.
+// Display list of all Songs.
 exports.song_list = (req, res) => {
-  res.send("NOT IMPLEMENTED: Song list");
+  Song.find({}, 'title youtube_link artist')
+    .sort({ title: 1 })
+    .populate('artist')
+    .exec(function (err, list_songs) {
+      if (err) {
+        return next(err);
+      }
+      // Successful, so render
+      res.render('song_list', {
+        title: 'Song List',
+        song_list: list_songs,
+      });
+    });
 };
 
 // Display detail page for a specific Song.
