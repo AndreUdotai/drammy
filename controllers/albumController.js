@@ -1,8 +1,21 @@
+const { nextTick } = require("async");
 const Album = require("../models/album");
 
-// Display list of all Album.
+// Display list of all Albums.
 exports.album_list = (req, res) => {
-  res.send("NOT IMPLEMENTED: Album list");
+  Album.find({}, 'name')
+    .sort({ name: 1 })
+    .populate('artist')
+    .exec(function (err, list_albums) {
+      if (err) {
+        return next(err);
+      }
+      // Successful, so render
+      res.render('album_list', {
+        title: 'Album List',
+        album_list: list_albums,
+      });
+    });
 };
 
 // Display detail page for a specific Album.
