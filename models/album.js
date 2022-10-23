@@ -8,11 +8,11 @@ const AlbumSchema = new Schema({
         required: true,
         maxLength: 100,
     },
+    released_date: { type: Date },
     description: {
         type: String,
         required: true,
     },
-    released_date: { type: Date },
 });
 
 //Virtual for album's URL

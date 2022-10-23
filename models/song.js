@@ -8,24 +8,23 @@ const SongSchema = new Schema({
         required: true,
         maxLength: 100,
     },
+    released_date: { type: Date },
     youtube_link: {
         type: String,
         required: true,
     },
-    released_date: { type: Date },
     artist: {
         type: Schema.Types.ObjectId,
         ref: 'Artist',
         required: true,
     },
+    genre: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Genre',
+}],
     album: {
         type: Schema.Types.ObjectId,
         ref: 'Album',
-    },
-    genre: {
-        type: Schema.Types.ObjectId,
-        ref: 'Genre',
-        required: true,
     },
 });
 
