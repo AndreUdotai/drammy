@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-console.log('This script populates some test songs, artists, genres and albums to your database. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0.a9azn.mongodb.net/local_library?retryWrites=true');
+console.log('This script populates some test songs, artists, genres and albums to your database. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0.a9azn.mongodb.net/drammy?retryWrites=true');
 
 // Get arguments passed on command line
 var userArgs = process.argv.slice(2);
@@ -62,12 +62,15 @@ function genreCreate(name, cb) {
 function songCreate(title, released_date, youtube_link, artist, genre, album, cb) {
   songdetail = { 
     title: title,
-    released_date: released_date,
-    youtube_link: youtube_link,
+    // released_date: released_date,
+    // youtube_link: youtube_link,
     artist: artist,
-    album: album,
+    genre: genre,
+    // album: album,
   }
-  if (genre != false) songdetail.genre = genre
+  if (album != false) songdetail.album = album
+  if (released_date != false) songdetail.released_date = released_date
+  if (youtube_link != false) songdetail.youtube_link = youtube_link
     
   var song = new Song(songdetail);    
   song.save(function (err) {
@@ -85,9 +88,10 @@ function songCreate(title, released_date, youtube_link, artist, genre, album, cb
 function albumCreate(name, released_date, descripton, cb) {
   albumdetail = { 
     name: name,
-    released_date: released_date,
+    // released_date: released_date,
     descripton: descripton,
-  }    
+  }
+  if (released_date != false) albumdetail.released_date = released_date
     
   var album = new Album(albumdetail);    
   album.save(function (err) {
@@ -98,7 +102,7 @@ function albumCreate(name, released_date, descripton, cb) {
     }
     console.log('New Album: ' + album);
     albums.push(album)
-    cb(null, song)
+    cb(null, album)
   }  );
 }
 
@@ -129,48 +133,50 @@ function createGenreArtists(cb) {
         function(callback) {
           genreCreate("R&B", callback);
         },
+        function(callback) {
+          genreCreate("Ragae", callback);
+        },
         ],
         // optional callback
         cb);
+}
+
+function createAlbums(cb) {
+  async.parallel([
+      function(callback) {
+        albumCreate('Made in Lagos', '1973-06-06', 'Best songs', callback)
+      },
+      function(callback) {
+        albumCreate('African Giant', '1973-06-06', 'Best songs', callback)
+      },
+      function(callback) {
+        albumCreate('Freedom', '1973-06-06', 'Best songs', callback)
+      },
+      function(callback) {
+        albumCreate('Box', '1973-06-06', 'Best songs', callback)
+      },
+      ],
+      // Optional callback
+      cb);
 }
 
 
 function createSongs(cb) {
     async.parallel([
         function(callback) {
-          songCreate('Essence', '9781473211896', 'https://www.youtube.com/watch?v=Wa5B22KAkEk', artists[0], [genres[0],], albums[0], callback);
+          songCreate('Essence', '1973-06-06', 'https://www.youtube.com/watch?v=Wa5B22KAkEk', artists[0], [genres[0],], albums[0], callback);
         },
         function(callback) {
-          songCreate("Young, wild and free", '9788401352836', 'https://www.youtube.com/watch?v=Wa5B22KAkEk', artists[0], [genres[0],], albums[0], callback);
+          songCreate("Young, wild and free", '1973-06-06', 'https://www.youtube.com/watch?v=Wa5B22KAkEk', artists[1], [genres[1],], albums[1], callback);
         },
         function(callback) {
-          songCreate("Fall", '9780756411336', 'https://www.youtube.com/watch?v=Wa5B22KAkEk', artists[0], [genres[0],], albums[0], callback);
+          songCreate("Fall", '1973-06-06', 'https://www.youtube.com/watch?v=Wa5B22KAkEk', artists[2], [genres[2],], albums[2], callback);
         },
         function(callback) {
-          songCreate("Rap God", '9780765379528', "https://www.youtube.com/watch?v=Wa5B22KAkEk", artists[1], [genres[1],], albums[0], callback);
+          songCreate("Rap God", '1973-06-06', "https://www.youtube.com/watch?v=Wa5B22KAkEk", artists[3], [genres[3],], albums[3], callback);
         },
         ],
         // optional callback
-        cb);
-}
-
-
-function createAlbums(cb) {
-    async.parallel([
-        function(callback) {
-          albumCreate(songs[0], artists[0], 'Made in Lagos', '9781473211896', 'Best songs', callback)
-        },
-        function(callback) {
-          albumCreate(songs[1], artists[2], 'African Giant', '9781473211896', 'Best songs', callback)
-        },
-        function(callback) {
-          albumCreate(songs[2], artists[1], 'Freedom', '9781473211896', 'Best songs', callback)
-        },
-        function(callback) {
-          albumCreate(songs[3], artists[3], 'Box', '9781473211896', 'Best songs', callback)
-        },
-        ],
-        // Optional callback
         cb);
 }
 
@@ -178,8 +184,8 @@ function createAlbums(cb) {
 
 async.series([
     createGenreArtists,
-    createSongs,
-    createAlbums
+    createAlbums,
+    createSongs
 ],
 // Optional callback
 function(err, results) {
@@ -187,7 +193,7 @@ function(err, results) {
         console.log('FINAL ERR: '+err);
     }
     else {
-        console.log('BOOKInstances: '+albums);
+        console.log('ALBUMS: '+albums);
         
     }
     // All done, disconnect from database
