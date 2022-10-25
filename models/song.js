@@ -11,7 +11,6 @@ const SongSchema = new Schema({
     released_date: { type: Date },
     youtube_link: {
         type: String,
-        required: true,
     },
     artist: {
         type: Schema.Types.ObjectId,
