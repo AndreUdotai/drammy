@@ -85,11 +85,11 @@ function songCreate(title, released_date, youtube_link, artist, genre, album, cb
 }
 
 
-function albumCreate(name, released_date, descripton, cb) {
+function albumCreate(name, released_date, description, cb) {
   albumdetail = { 
     name: name,
     // released_date: released_date,
-    descripton: descripton,
+    description: description,
   }
   if (released_date != false) albumdetail.released_date = released_date
     
