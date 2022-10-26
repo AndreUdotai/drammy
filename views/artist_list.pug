@@ -6,7 +6,7 @@ block content
     ul
         each artist in artist_list
             li
-                a(hreg=artist.url) #{artist.name}
+                a(href=artist.url) #{artist.name}
 
         else
             li There are no artists.
