@@ -4,10 +4,15 @@ block content
     h1= title
 
     ul
-        each album in album_list
+        - let albumNames = [];
+        each song in album_songs_list
+            - albumNames.push(song.album.name)
             li
-                a(href=album.url) #{album.name}
-                | (#{album.artist.name})
+                a(href=song.album.url) #{song.album.name} 
+                | by #{song.artist.name}
 
-        else
-            li There are no albums
+        - let albums = [];
+        each album in album_list
+            unless albumNames.includes(album.name)
+                li
+                    a(href=album.url) #{album.name}
