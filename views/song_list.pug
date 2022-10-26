@@ -6,8 +6,9 @@ block content
     ul
         each song in song_list
             li
-                a(href=song.url) #{song.title} #{song.youtube_link}
-                | (#{song.artist.name})
+                a(href=song.url) #{song.title} 
+                | by 
+                a(href=song.artist.url) #{song.artist.name}
 
         else
             li There are no songs.
