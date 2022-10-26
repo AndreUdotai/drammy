@@ -34,7 +34,37 @@ exports.album_list = (req, res) => {
 
 // Display detail page for a specific Album.
 exports.album_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Album detail: ${req.params.id}`);
+  async.parallel(
+    {
+      albums(callback) {
+        Album.findById(req.params.id).exec(callback);
+      },
+      album_songs(callback) {
+        Song.find({ album: req.params.id })
+          .populate('artist')
+          .populate('album')
+          .populate('genre')
+          .exec(callback);
+      },
+    },
+    (err, results) => {
+      if(err) {
+        return next(err);
+      }
+      if(results.albums == null) {
+        // No results.
+        const err = new Error("Album not found");
+        err.status = 404;
+        return next(err);
+      }
+      // Successful, so render
+      res.render("album_detail", {
+        title: "Album Detail",
+        album: results.albums,
+        album_songs: results.album_songs
+      });
+    }
+  )
 };
 
 // Display Album create form on GET.
