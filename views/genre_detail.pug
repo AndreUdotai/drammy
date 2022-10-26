@@ -8,22 +8,23 @@ block content
 
         h4 Songs
 
-        dl
-            each songs in genre_songs
-                dt
+        ul
+            each song in genre_songs
+                li
                     a(href=song.url) #{song.title}
-                
+               
         h4 Artists
 
-        dl
-            each artist in genre_songs
-                dt
+        ul
+            each song in genre_songs
+                li
                     a(href=song.artist.url) #{song.artist.name}
 
         h4 Albums
 
-        dl
-            each album in genre_songs
-                dt
+        ul
+            each song in genre_songs
+                li
                     a(href=song.album.url) #{song.album.name}
+ 
                     
