@@ -66,15 +66,3 @@ exports.album_update_get = (req, res) => {
 exports.album_update_post = (req, res) => {
   res.send("NOT IMPLEMENTED: Album update POST");
 };
-
-
-
-
-
-         //   - albums.push(album.name)
-          //  li
-               // a(href=album.url) #{album.name}
-        // - console.log(albums)
-        
-        //else
-        //li There are no albums
