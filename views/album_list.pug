@@ -9,7 +9,8 @@ block content
             - albumNames.push(song.album.name)
             li
                 a(href=song.album.url) #{song.album.name} 
-                | by #{song.artist.name}
+                | by 
+                a(href=song.artist.url) #{song.artist.name}
 
         - let albums = [];
         each album in album_list
