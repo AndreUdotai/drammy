@@ -1,0 +1,19 @@
+extends layout
+
+block content
+
+    h1= title
+    
+    h2 #{album.name} 
+    p  by 
+        a(href=album_songs[0].artist.url) #{album_songs[0].artist.name}
+
+    div(style='margin-left:20px;margin-top:20px')
+
+        p #{album.description}
+        p Released on #{album.released_date}
+        h3 Songs
+        ul 
+            each song in album_songs 
+                li 
+                    a(href=song.url) #{song.title}
