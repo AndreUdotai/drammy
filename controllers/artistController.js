@@ -1,5 +1,6 @@
 const { nextTick } = require("async");
 const Artist = require("../models/artist");
+const Song = require("../models/song");
 
 // Display list of all artists.
 exports.artist_list = (req, res) => {
@@ -19,7 +20,33 @@ exports.artist_list = (req, res) => {
 
 // Display detail page for each artist.
 exports.artist_detail = (req, res) => {
-    res.send(`NOT IMPLEMENT: Artist detail: ${req.params.id}`);
+    async.parallel(
+        {
+            artists(callback) {
+                Artist.findById(req.params.id).exec(callback);
+            },
+
+            artist_songs(callback) {
+                Song.find({ artist: req.params.id }).exec(callback);
+            },
+        },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            if (results.artists == null) {
+                const err = new Error("Artist not found");
+                err.status = 404;
+                return next(err);
+            }
+            // Successful, so render
+            res.render("artist_detail", {
+                title: "Artist Detail",
+                artist: results.artists,
+                artist_songs: results.artist_songs,
+            })
+        }
+    )
 };
 
 // Display artist create form on GET.
