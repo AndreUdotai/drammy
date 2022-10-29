@@ -51,7 +51,25 @@ exports.song_list = (req, res) => {
 
 // Display detail page for a specific Song.
 exports.song_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Song detail: ${req.params.id}`);
+  Song.findById(req.params.id)
+    .populate('album')
+    .populate('artist')
+    .populate('genre')
+    .exec(function(err, song_detail) {
+      if (err) {
+        return next(err);
+      }
+      if (song_detail == null){
+        // No results
+        const err = new Error('Song not found');
+        err.status = 404;
+        return next(err);
+      }
+      // Successful, so render
+      res.render("song_detail", {
+        song_detail: song_detail,
+      })
+    });
 };
 
 // Display Song create form on GET.
