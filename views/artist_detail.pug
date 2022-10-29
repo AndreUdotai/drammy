@@ -1,0 +1,23 @@
+extends layout 
+
+block content 
+
+    h1= title 
+
+    h2 #{artist.name}
+
+    p #{artist.country}
+
+    h4 Albums
+
+    dl
+        each song in artist_songs
+            dt
+                a(href=song.album.url) #{song.album.name}
+
+    h4 Songs
+
+    ul
+        each song in artist_songs 
+            li 
+                a(href=song.url) #{song.title}
