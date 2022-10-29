@@ -1,6 +1,7 @@
 const { nextTick } = require("async");
 const Artist = require("../models/artist");
 const Song = require("../models/song");
+const async = require("async");
 
 // Display list of all artists.
 exports.artist_list = (req, res) => {
@@ -27,7 +28,9 @@ exports.artist_detail = (req, res) => {
             },
 
             artist_songs(callback) {
-                Song.find({ artist: req.params.id }).exec(callback);
+                Song.find({ artist: req.params.id })
+                    .populate('album')
+                    .exec(callback);
             },
         },
         (err, results) => {
