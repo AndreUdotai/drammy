@@ -1,0 +1,21 @@
+extends layout
+
+block content
+
+    h1 #{song_detail.title}
+    p by 
+        a(href=song_detail.artist.url) #{song_detail.artist.name}
+    p
+        each genre, index in song_detail.genre 
+            a(href=genre.url) #{genre.name}
+            if index < song_detail.genre.length - 1
+                |,
+
+    unless song_detail.album == null 
+        p '#{song_detail.title}' belongs to the 
+            a(href=song_detail.album.url) #{song_detail.album.name} 
+            | album
+
+    unless song_detail.youtube_link == null 
+        p 
+            a(href=song_detail.youtube_link) Listen to '#{song_detail.title}' on Youtube
