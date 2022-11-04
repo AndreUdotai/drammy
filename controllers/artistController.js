@@ -1,3 +1,4 @@
+const { body, validationResult } = require("express-validator");
 const { nextTick } = require("async");
 const Artist = require("../models/artist");
 const Song = require("../models/song");
@@ -54,13 +55,55 @@ exports.artist_detail = (req, res) => {
 
 // Display artist create form on GET.
 exports.artist_create_get = (req, res) => {
-    res.send("NOT IMPLEMENTED: Artist create GET");
+    res.render("artist_form", {title: "Create Artist"});
 };
 
 // Handle artist create on POST.
-exports.artist_create_post = (req, res) => {
-    res.send("NOT IMPLEMENTED: Artist create POST");
-};
+exports.artist_create_post = [
+    // Validate and sanitize fields.
+    body("name")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Artist's name must be specified."),
+    body("country")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Artist's country must be specified.")
+        .isAlphanumeric()
+        .withMessage("Country has non-alphanumeric characters."),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render form again with sanitized values/errors messages.
+            res.render("artist_form", {
+                title: "Create Artist",
+                artist: req.body,
+                errors: errors.array(),
+            });
+            return;
+        }
+        // Data from form is valid.
+
+        // Create an Artist object with escaped and trimmed data.
+        const artist = new Artist({
+            name: req.body.name,
+            country: req.body.country,
+        });
+        artist.save((err) => {
+            if (err) {
+                return next(err);
+            }
+            // Succrssful - redirect to new artist record.
+            res.redirect(artist.url);
+        });
+    },
+];
 
 // Display artst delete form on GET.
 exports.artist_delete_get = (req, res) => {
