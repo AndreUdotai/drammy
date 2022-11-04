@@ -56,12 +56,12 @@ exports.genre_detail = (req, res, next) => {
     );
 };
 
-// Handle Genre create form on GET.
+// Display Genre create form on GET.
 exports.genre_create_get = (req, res, next) => {
   res.render("genre_form", { title: "Create Genre" })
 };
 
-// Display Genre create on POST.
+// Handle Genre create on POST.
 exports.genre_create_post = [
   // Validate and sanitize the name field.
   body("name", "Genre name required").trim().isLength({ min: 1 }).escape(),
