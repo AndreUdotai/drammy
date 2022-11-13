@@ -105,7 +105,7 @@ exports.artist_create_post = [
     },
 ];
 
-// Display artst delete form on GET.
+// Display artist delete form on GET.
 exports.artist_delete_get = (req, res) => {
     async.parallel(
         {
@@ -150,10 +150,10 @@ exports.artist_delete_post = (req, res, next) => {
                 return next(err)
             }
             // Success
-            if (results.artist_books.length > 0) {
+            if (results.artist_songs.length > 0) {
                 // Artist has books. Render in same way as for GET route.
-                res.render("author_delete", {
-                    title: "Delete Author",
+                res.render("artist_delete", {
+                    title: "Delete Artist",
                     artist: results.artist,
                     artist_songs: results.artist_song,
                 });
@@ -165,7 +165,7 @@ exports.artist_delete_post = (req, res, next) => {
                     return next(err);
                 }
                 // Success - go to artist list
-                res.redirect("/catalog/authors");
+                res.redirect("/catalog/artists");
             });
         }
     );
