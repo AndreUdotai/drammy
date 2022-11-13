@@ -26,5 +26,7 @@ block content
             each song in genre_songs
                 li
                     a(href=song.album.url) #{song.album.name}
- 
+        hr
+        p
+            a(href=genre.url+'/delete') Delete genre
                     
