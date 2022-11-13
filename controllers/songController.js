@@ -1,4 +1,4 @@
-const { body, validationResult } = require("express-validator");
+const { body, validationResult } = require('express-validator');
 const Song = require('../models/song');
 const Artist = require('../models/artist');
 const Genre = require('../models/genre');
@@ -153,7 +153,7 @@ exports.song_create_post = [
                     },
                     albums(callback) {
                         Album.find(callback);
-                    }
+                    },
                 },
                 (err, results) => {
                     if (err) {
@@ -194,24 +194,24 @@ exports.song_create_post = [
 exports.song_delete_get = (req, res) => {
     async.parallel(
         {
-            song(callback){
+            song(callback) {
                 Song.findById(req.params.id).exec(callback);
             },
         },
         (err, results) => {
-            if(err){
+            if (err) {
                 return next(err);
             }
-            if (results.song == null){
+            if (results.song == null) {
                 // No results.
-                res.redirect("/catalog/songs");
+                res.redirect('/catalog/songs');
             }
             // Successful, so render.
-            res.render("song_delete", {
-                title: "Delete Song",
-                song: results.song
+            res.render('song_delete', {
+                title: 'Delete Song',
+                song: results.song,
             });
-        }
+        },
     );
 };
 
@@ -224,27 +224,161 @@ exports.song_delete_post = (req, res) => {
             },
         },
         (err, results) => {
-            if(err) {
+            if (err) {
                 return next(err);
             }
             // Success
-            Song.findByIdAndRemove(req.body.bookid, (err) => {
-                if(err){
+            Song.findByIdAndRemove(req.body.songid, (err) => {
+                if (err) {
                     return next(err);
                 }
                 // Success - go to song list
-                res.redirect("/catalog/songs");
+                res.redirect('/catalog/songs');
             });
-        }
+        },
     );
 };
 
 // Display Song update form on GET.
 exports.song_update_get = (req, res) => {
-    res.send('NOT IMPLEMENTED: Song update GET');
+    // Get song, artist, album and genres for form.
+    async.parallel(
+        {
+            song(callback) {
+                Song.findById(req.params.id)
+                    .populate('artist')
+                    .populate('album')
+                    .populate('genre')
+                    .exec(callback);
+            },
+            artists(callback) {
+                Artist.find(callback);
+            },
+            albums(callback){
+                Album.find(callback)
+            },
+            genres(callback) {
+                Genre.find(callback);
+            },
+        },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            if (results.song == null) {
+                // No results.
+                const err = new Error('Song not found');
+                err.status = 404;
+                return next(err);
+            }
+            // Success.
+            // Mark our selected genres as checked.
+            for (const genre of results.genres) {
+                for (const songGenre of results.song.genre) {
+                    if (genre._id.toString() === songGenre._id.toString()) {
+                        genre.checked = 'true';
+                    }
+                }
+            }
+            res.render('song_form', {
+                title: 'Update Song',
+                artists: results.artists,
+                albums: results.albums,
+                genres: results.genres,
+                song: results.song,
+            });
+        },
+    );
 };
 
 // Handle Song update on POST.
-exports.song_update_post = (req, res) => {
-    res.send('NOT IMPLEMENTED: Song update POST');
-};
+exports.song_update_post = [
+    // Convert the genre to an array
+    (req, res, next) => {
+      if (!Array.isArray(req.body.genre)) {
+        req.body.genre =
+          typeof req.body.genre === "undefined" ? [] : [req.body.genre];
+      }
+      next();
+    },
+  
+    // Validate and sanitize fields.
+    body('title', 'Title must not be empty.').trim().isLength({ min: 1 }),
+    body('released_date', 'Invalid date of release')
+        .optional({ checkFalsy: true })
+        .isISO8601()
+        .toDate(),
+    body('youtube_link', '').optional({ checkFalsy: true }).trim(),
+    body('artist', 'Artist must not be empty.').trim().isLength({ min: 1 }),
+    body('genre.*').escape(),
+
+    body('album', '').optional({ checkFalsy: true }).trim(),
+  
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+      // Extract the validation errors from a request.
+      const errors = validationResult(req);
+  
+      // Create a Song object with escaped/trimmed data and old id.
+      const song = new Song({
+        title: req.body.title,
+        released_date: req.body.released_date,
+        youtube_link: req.body.youtube_link,
+        artist: req.body.artist,
+        album: req.body.album,
+        genre: typeof req.body.genre === "undefined" ? [] : req.body.genre,
+        _id: req.params.id, //This is required, or a new ID will be assigned!
+      });
+  
+      if (!errors.isEmpty()) {
+        // There are errors. Render form again with sanitized values/error messages.
+  
+        // Get all artists, albums and genres for form.
+        async.parallel(
+          {
+            artists(callback) {
+              Author.find(callback);
+            },
+            albums(callback) {
+                Album.find(callback);
+            },
+            genres(callback) {
+              Genre.find(callback);
+            },
+          },
+          (err, results) => {
+            if (err) {
+              return next(err);
+            }
+  
+            // Mark our selected genres as checked.
+            for (const genre of results.genres) {
+              if (song.genre.includes(genre._id)) {
+                genre.checked = "true";
+              }
+            }
+            res.render("song_form", {
+              title: "Update Song",
+              released_date: results.released_date,
+              youtube_link: results.youtube_link,
+              artists: results.artists,
+              albums: results.albums,
+              genres: results.genres,
+              song,
+              errors: errors.array(),
+            });
+          }
+        );
+        return;
+      }
+  
+      // Data from form is valid. Update the record.
+      Song.findByIdAndUpdate(req.params.id, song, {}, (err, thesong) => {
+        if (err) {
+          return next(err);
+        }
+        // Successful: redirect to song detail page.
+        res.redirect(thesong.url);
+      });
+    },
+  ];
