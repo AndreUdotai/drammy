@@ -137,9 +137,9 @@ exports.album_delete_get = (req, res, next) => {
             if(err) {
                 return next(err);
             }
-            if(results.genre == null){
+            if(results.album == null){
                 // No results
-                res.redirect("/catalog/genres");
+                res.redirect("/catalog/albums");
             }
             // Successful, so render,
             res.render("album_delete", {

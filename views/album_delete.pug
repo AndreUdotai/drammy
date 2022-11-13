@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  h1 #{title}: #{album.name}
+
+  if album_songs.length
+
+    p #[strong Delete the following songs before attempting to delete this album.]
+
+    div(style='margin-left:20px;margin-top:20px')
+
+      h4 Songs
+
+      dl
+      each song in album_songs
+        dt
+          a(href=song.url) #{song.title}
+
+  else
+    p Do you really want to delete this Album?
+
+    form(method='POST' action='')
+      div.form-group
+        input#albumid.form-control(type='hidden',name='albumid', required='true', value=album._id )
+
+      button.btn.btn-primary(type='submit') Delete

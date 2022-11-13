@@ -20,3 +20,6 @@ block content
             each song in album_songs 
                 li
                     a(href=song.url) #{song.title}
+        hr
+        p
+            a(href=album.url+'/delete') Delete album
