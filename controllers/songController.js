@@ -192,12 +192,51 @@ exports.song_create_post = [
 
 // Display Song delete form on GET.
 exports.song_delete_get = (req, res) => {
-    res.send('NOT IMPLEMENTED: Song delete GET');
+    async.parallel(
+        {
+            song(callback){
+                Song.findById(req.params.id).exec(callback);
+            },
+        },
+        (err, results) => {
+            if(err){
+                return next(err);
+            }
+            if (results.song == null){
+                // No results.
+                res.redirect("/catalog/songs");
+            }
+            // Successful, so render.
+            res.render("song_delete", {
+                title: "Delete Song",
+                song: results.song
+            });
+        }
+    );
 };
 
 // Handle Song delete on POST.
 exports.song_delete_post = (req, res) => {
-    res.send('NOT IMPLEMENTED: Song delete POST');
+    async.parallel(
+        {
+            song(callback) {
+                Song.findById(req.body.songid).exec(callback);
+            },
+        },
+        (err, results) => {
+            if(err) {
+                return next(err);
+            }
+            // Success
+            Song.findByIdAndRemove(req.body.bookid, (err) => {
+                if(err){
+                    return next(err);
+                }
+                // Success - go to song list
+                res.redirect("/catalog/songs");
+            });
+        }
+    );
 };
 
 // Display Song update form on GET.
