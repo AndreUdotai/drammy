@@ -19,3 +19,7 @@ block content
     unless song_detail.youtube_link == null 
         p 
             a(href=song_detail.youtube_link) Listen to '#{song_detail.title}' on Youtube
+    
+        hr
+        p
+            a(href=song_detail.url+'/delete') Delete song
