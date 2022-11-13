@@ -16,7 +16,7 @@ router.get('/', song_controller.index);
 router.get('/song/create', song_controller.song_create_get);
 
 // POST request for create Song.
-router.post('song/create', song_controller.song_create_post);
+router.post('/song/create', song_controller.song_create_post);
 
 // GET request to delete Song.
 router.get('/song/:id/delete', song_controller.song_delete_get);
