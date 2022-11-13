@@ -21,3 +21,6 @@ block content
         each song in artist_songs 
             li 
                 a(href=song.url) #{song.title}
+    hr
+    p
+        a(href=artist.url+'/delete') Delete artist
