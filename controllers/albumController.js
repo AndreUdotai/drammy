@@ -123,13 +123,69 @@ exports.album_create_post = [
 ];
 
 // Display Album delete form on GET.
-exports.album_delete_get = (req, res) => {
-    res.send('NOT IMPLEMENTED: Album delete GET');
+exports.album_delete_get = (req, res, next) => {
+    async.parallel(
+        {
+            album(callback) {
+                Album.findById(req.params.id).exec(callback);
+            },
+            album_songs(callback){
+                Song.find({ album: req.params.id }).exec(callback);
+            },
+        },
+        (err, results) => {
+            if(err) {
+                return next(err);
+            }
+            if(results.genre == null){
+                // No results
+                res.redirect("/catalog/genres");
+            }
+            // Successful, so render,
+            res.render("album_delete", {
+                title: "Delete Album",
+                album: results.album,
+                album_songs: results.album_songs,
+            });
+        }
+    );
 };
 
 // Handle Album delete on POST.
-exports.album_delete_post = (req, res) => {
-    res.send('NOT IMPLEMENTED: Album delete POST');
+exports.album_delete_post = (req, res, next) => {
+    async.parallel(
+        {
+            album(callback){
+                Album.findById(req.body.albumid).exec(callback);
+            },
+            album_songs(callback){
+                Song.find({ album: req.body.album }).exec(callback);
+            },
+        },
+        (err, results) => {
+            if(err) {
+                return next(err);
+            }
+            // Success
+            if(results.album_songs.length > 0){
+                // Album has songs. Render in same was as for GET route.
+                res.render("album_delete", {
+                    title: "Delete Album",
+                    album: results.album,
+                    album_songs: results.album_songs,
+                });
+                return;
+            }
+            // Genre has no songs. Delete object and redirect to the list of albums.
+            Album.findByIdAndRemove(req.body.albumid, (err) => {
+                if (err) {
+                    return next(err);
+                }
+                // Success - go to the album list
+                res.redirect("/catalog/albums")
+            });
+        }
+    );
 };
 
 // Display Album update form on GET.
