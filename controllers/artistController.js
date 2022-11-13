@@ -107,12 +107,68 @@ exports.artist_create_post = [
 
 // Display artst delete form on GET.
 exports.artist_delete_get = (req, res) => {
-    res.send("NOT IMPLEMENTED: Artist delete GET");
+    async.parallel(
+        {
+            artist(callback) {
+                Artist.findById(req.params.id).exec(callback);
+            },
+            artist_songs(callback) {
+                Song.find({ artist: req.params.id }).exec(callback);
+            }
+        },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            if (results.artist == null) {
+                // No results.
+                res.redirect("/catalog/artists");
+            }
+            // Successful, so render.
+            res.render("artist_delete", {
+                title: "Delete Artist",
+                artist: results.artist,
+                artist_songs: results.artist_songs,
+            });
+        }
+    );
 };
 
 // Handle artist delete on POST.
-exports.artist_delete_post = (req, res) => {
-    res.send("NOT IMPLEMENTED: Artist delete POST");
+exports.artist_delete_post = (req, res, next) => {
+    async.parallel(
+        {
+            artist(callback) {
+                Artist.findById(req.body.artistid).exec(callback);
+            },
+            artist_songs(callback) {
+                Song.find({ artist: req.body.artistid }).exec(callback);
+            },
+        },
+        (err, results) => {
+            if (err) {
+                return next(err)
+            }
+            // Success
+            if (results.artist_books.length > 0) {
+                // Artist has books. Render in same way as for GET route.
+                res.render("author_delete", {
+                    title: "Delete Author",
+                    artist: results.artist,
+                    artist_songs: results.artist_song,
+                });
+                return;
+            }
+            // Artist has no songs. Delete object and redirect to the list of all artists.
+            Artist.findByIdAndRemove(req.body.artistid, (err) => {
+                if (err) {
+                    return next(err);
+                }
+                // Success - go to artist list
+                res.redirect("/catalog/authors");
+            });
+        }
+    );
 };
 
 // Display artist update form on GET.
