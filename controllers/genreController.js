@@ -115,7 +115,7 @@ exports.genre_delete_get = (req, res, next) => {
           Genre.findById(req.params.id).exec(callback);
         },
         genre_songs(callback) {
-          Song.find({ artist: req.params.id }).exec(callback)
+          Song.find({ genre: req.params.id }).exec(callback)
         }
       },
       (err, results) => {
@@ -130,47 +130,47 @@ exports.genre_delete_get = (req, res, next) => {
         res.render("genre_delete", {
           title: "Delete Genre",
           genre: results.genre,
-          genre_artist: results.genre_songs,
+          genre_songs: results.genre_songs,
         });
       }
     );
 };
 
 // Handle Genre delete on POST.
-exports.genre_delete_post = (req, res, next) => {
-    async.parallel(
-      {
-        genre(callback) {
-          Genre.findById(req.body.genreid).exec(callback);
-        },
-        genre_songs(callback) {
-          Song.find({ genre: req.body.genreid }).exec(callback);
-        },
+exports.genre_delete_post = (req, res) => {
+  async.parallel(
+    {
+      genre(callback){
+        Genre.findById(req.body.genreid).exec(callback);
       },
-      (err, results) => {
-        if (err) {
-          return next(err)
-        }
-        // Success
-        if (results.genre_songs.length > 0) {
-          // Genre has books. Render in the same way as for GET route.
-          res.render("genre_delete", {
-            title: "Delete Genre",
-            gnere: results.genre,
-            genre_songs: results.genre_songs,
-          });
-          return
-        }
-        // Genre has no songs. Delete object and redirect to the list of all genres.
-        Genre.findByIdAndRemove(req.body.genreid, (err) => {
-          if (err) {
-            return next(err);
-          }
-          // Success - go to genre list
-          res.redirect("/catalog/genres");
-        });
+      genre_songs(callback){
+        Song.find({genre: req.body.genreid}).exec(callback);
+      },
+    },
+    (err, results) => {
+      if(err){
+        return next(err);
       }
-    );
+      // Success
+      if (results.genre_songs.length > 0){
+        // Genre has songs. Render in same way as for GET route.
+        res.render("genre_delete", {
+          title: "Delete Genre",
+          genre: results.genre,
+          genre_songs: results.genre_songs,
+        });
+        return;
+      }
+      // Genre has no songs. Delete object and redirect to the list of artist.
+      Genre.findByIdAndRemove(req.body.genreid, (err) => {
+        if (err) {
+          return next(err);
+        }
+        // Success - go to genre list
+        res.redirect("/catalog/genres")
+      });
+    }
+  );
 };
 
 // Display Genre update form on GET.
