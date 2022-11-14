@@ -9,7 +9,6 @@ block content
       input#title.form-control(type='text', placeholder='Title of song' name='title' required='true' value=(undefined===song ? '' : song.title) )
     div.form-group
       label(for='released_date') Year of Release:
-      - console.log(song.released_date)
       input#released_date.form-control(type='date' name='released_date' value=(undefined===song ? '' : song.released_date) )
     div.form-group
       label(for='artist') Artist:
@@ -22,14 +21,14 @@ block content
           else
             option(value=artist._id) #{artist.name}
     div.form-group
-        label(for='album') Album:
-        select#album.form-control(type='select', placeholder='Select album if song belongs to an album' name='album' )
-            - albums.sort(function(a, b) {let textA = a.name.toUpperCase(); let textB = b.name.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
-            for album in albums
-                if album
-                    option(value=album._id, selected=(album._id.toString()===song.album._id.toString() ? 'selected' : false) ) #{album.name}
-                else
-                    option(value=album._id) #{album.name}
+      label(for='album') Album:
+      select#album.form-control(type='select', placeholder='Select album if song belongs to an album' name='album' )
+        - albums.sort(function(a, b) {let textA = a.name.toUpperCase(); let textB = b.name.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+        for album in albums
+          if song
+            option(value=album._id, selected=(album._id.toString()==song.album._id) ? 'selected' : false) #{album.name}
+          else
+            option(value=album._id) #{album.name}
     div.form-group
       label(for='youtube_link') Youtube Link:
       input#youtube_link.form-control(type='text', placeholder='Youtube link' name='youtube_link' value=(undefined===song ? '' : song.youtube_link))
