@@ -172,11 +172,73 @@ exports.artist_delete_post = (req, res, next) => {
 };
 
 // Display artist update form on GET.
-exports.artist_update_get = (req, res) => {
-    res.send("NOT IMPLEMENTED: Artist update GET");
+exports.artist_update_get = (req, res, next) => {
+    // Get artist for the form
+    Artist.findById(req.params.id, (err, artist) => {
+        if (err) {
+            return next(err);
+        }
+        if (artist == null) {
+            // No results
+            const err = new Error('Artist not found');
+            err.status = 404;
+            return next(err);
+        }
+        // Success.
+        res.render('artist_form', { title: 'Update Artist', artist: artist });
+    });
 };
 
 // Handle artist update on POST.
-exports.artist_update_post = (req, res) => {
-    res.send("NOT IMPLEMENETED: Artist update POST");
-};
+exports.artist_update_post = [
+    // Validate and sanitize fields.
+    body("name")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Artist's name must be specified."),
+    body("country")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Artist's country must be specified.")
+        .isAlphanumeric()
+        .withMessage("Country has non-alphanumeric characters."),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create a artist object with escaped and trimmed data (and the old id!)
+        let artist = new Artist({
+            name: req.body.name,
+            country: req.body.country,
+            _id: req.params.id,
+        });
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render the form again with sanitized values and error messages.
+            res.render('artist_form', {
+                title: 'Update Artist',
+                artist: artist,
+                errors: errors.array(),
+            });
+            return;
+        } else {
+            // Data from form is valid. Update the record.
+            Artist.findByIdAndUpdate(
+                req.params.id,
+                artist,
+                {},
+                (err, theartist) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    // Successful - redirect to artist detail page.
+                    res.redirect(theartist.url);
+                },
+            );
+        }
+    },
+];

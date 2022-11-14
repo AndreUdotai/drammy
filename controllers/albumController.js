@@ -43,7 +43,7 @@ exports.album_detail = (req, res) => {
                 Song.find({ album: req.params.id })
                     .populate('artist')
                     .populate('album')
-                    .populate('genre')
+                    .populate('album')
                     .exec(callback);
             },
         },
@@ -176,7 +176,7 @@ exports.album_delete_post = (req, res, next) => {
                 });
                 return;
             }
-            // Genre has no songs. Delete object and redirect to the list of albums.
+            // Album has no songs. Delete object and redirect to the list of albums.
             Album.findByIdAndRemove(req.body.albumid, (err) => {
                 if (err) {
                     return next(err);
@@ -189,11 +189,79 @@ exports.album_delete_post = (req, res, next) => {
 };
 
 // Display Album update form on GET.
-exports.album_update_get = (req, res) => {
-    res.send('NOT IMPLEMENTED: Album update GET');
+exports.album_update_get = (req, res, next) => {
+    // Get album for the form
+    Album.findById(req.params.id, (err, album) => {
+        if(err) {
+            return next(err)
+        }
+        if(album == null) {
+            // No results
+            const err = new Error('Album not found');
+            err.status = 404;
+            return next(err);
+        }
+        // Success.
+        res.render('album_form', {
+            title: 'Update Album',
+            album: album,
+        })
+    })
 };
 
 // Handle Album update on POST.
-exports.album_update_post = (req, res) => {
-    res.send('NOT IMPLEMENTED: Album update POST');
-};
+exports.album_update_post = [
+    // Validate and sanitize the name field.
+    body('name')
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage('First name must be specified.'),
+    body('released_date', 'Invalid date of release')
+        .optional({ checkFalsy: true })
+        .isISO8601()
+        .toDate(),
+    body('description')
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage('Description must be specified.'),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create an album object with escaped and trimmed data (and the old id!)
+        let album = new Album({
+            name: req.body.name,
+            released_date: req.body.released_date,
+            description: req.body.description,
+            _id: req.params.id,
+        });
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render the form again with sanitized values and error messages.
+            res.render('album_form', {
+                title: 'Update Album',
+                album: album,
+                errors: errors.array(),
+            });
+            return;
+        } else {
+            // Data from form is valid. Update the record.
+            Album.findByIdAndUpdate(
+                req.params.id,
+                album,
+                {},
+                (err, thealbum) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    // Successful - redirect to album detail page.
+                    res.redirect(thealbum.url);
+                },
+            );
+        }
+    },
+];
